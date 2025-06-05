@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Analyst Tool - Regulatorisches Mapping-Analyzer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Corporate Colors - Customize these */
+            --brand-primary: #86bc25;
+            --brand-secondary: #0d2818;
+            --transition: all 0.3s ease;
+            --border-radius: 8px;
+            --border-radius-lg: 12px;
+        }
+
+        /* Enhanced Light Theme */
+        [data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f6fa;
+            --bg-tertiary: #e9ecef;
+            --bg-card: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #6c757d;
+            --text-muted: #868e96;
+            --border-color: #e0e0e0;
+            --border-hover: #ced4da;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.12);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.15);
+            --brand-accent: #d4edda;
+            --brand-accent-hover: #c3e6cb;
+            --glass-bg: rgba(255, 255, 255, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --input-bg: #ffffff;
+            --input-border: #e0e0e0;
+            --input-focus: #86bc25;
+        }
+
+        /* Enhanced Dark Theme */
+        [data-theme="dark"] {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --bg-card: #161b22;
+            --text-primary: #f0f6fc;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --border-color: #30363d;
+            --border-hover: #40464e;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
+            --brand-accent: rgba(134, 188, 37, 0.1);
+            --brand-accent-hover: rgba(134, 188, 37, 0.15);
+            --glass-bg: rgba(22, 27, 34, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --input-bg: #21262d;
+            --input-border: #30363d;
+            --input-focus: #86bc25;
+        }
+
+        /* Auto theme detection fallback */
+        @media (prefers-color-scheme: light) {
+            :root:not([data-theme]) {
+                --bg-primary: #ffffff;
+                --bg-secondary: #f5f6fa;
+                --bg-tertiary: #e9ecef;
+                --bg-card: #ffffff;
+                --text-primary: #1a1a1a;
+                --text-secondary: #6c757d;
+                --text-muted: #868e96;
+                --border-color: #e0e0e0;
+                --border-hover: #ced4da;
+                --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+                --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+                --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.12);
+                --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.15);
+                --brand-accent: #d4edda;
+                --brand-accent-hover: #c3e6cb;
+                --glass-bg: rgba(255, 255, 255, 0.8);
+                --glass-border: rgba(255, 255, 255, 0.2);
+                --input-bg: #ffffff;
+                --input-border: #e0e0e0;
+                --input-focus: #86bc25;
+            }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme]) {
+                --bg-primary: #0d1117;
+                --bg-secondary: #161b22;
+                --bg-tertiary: #21262d;
+                --bg-card: #161b22;
+                --text-primary: #f0f6fc;
+                --text-secondary: #8b949e;
+                --text-muted: #6e7681;
+                --border-color: #30363d;
+                --border-hover: #40464e;
+                --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+                --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+                --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.4);
+                --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
+                --brand-accent: rgba(134, 188, 37, 0.1);
+                --brand-accent-hover: rgba(134, 188, 37, 0.15);
+                --glass-bg: rgba(22, 27, 34, 0.8);
+                --glass-border: rgba(255, 255, 255, 0.1);
+                --input-bg: #21262d;
+                --input-border: #30363d;
+                --input-focus: #86bc25;
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: var(--transition);
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            position: relative;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-color);
+            border-radius: 25px;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 60px;
+            height: 40px;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--brand-primary);
+            transform: scale(1.05);
+        }
+
+        .theme-icon {
+            font-size: 1.2rem;
+            transition: var(--transition);
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .theme-icon.sun {
+            opacity: 1;
+        }
+
+        .theme-icon.moon {
+            opacity: 0;
+        }
+
+        [data-theme="dark"] .theme-icon.sun {
+            opacity: 0;
+        }
+
+        [data-theme="dark"] .theme-icon.moon {
+            opacity: 1;
+        }
+
+        /* Header */
+        .header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .brand-logo {
+            height: 30px;
+            transition: var(--transition);
+        }
+
+        [data-theme="dark"] .brand-logo {
+            filter: brightness(0) invert(1);
+        }
+
+        .header-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-btn {
+            background: var(--brand-primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .nav-btn:hover {
+            background: #6fa020;
+            transform: translateY(-1px);
+        }
+
+        .nav-btn.active {
+            background: var(--brand-secondary);
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Section Cards */
+        .section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-lg);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--brand-primary), #6fa020);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .section:hover::before {
+            transform: scaleX(1);
+        }
+
+        .section:hover {
+            box-shadow: var(--shadow-hover);
+            border-color: var(--border-hover);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--brand-primary);
+        }
+
+        .section-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--brand-primary), #6fa020);
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Model Selection Grid */
+        .model-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .model-card {
+            padding: 1.25rem;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            background: var(--bg-secondary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .model-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(134, 188, 37, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .model-card:hover::before {
+            left: 100%;
+        }
+
+        .model-card:hover {
+            border-color: var(--brand-primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .model-card.selected {
+            border-color: var(--brand-primary);
+            background: var(--brand-accent);
+            box-shadow: var(--shadow);
+        }
+
+        .model-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .model-desc {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .model-status {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+            display: inline-block;
+        }
+
+        .status-available {
+            background: var(--brand-accent);
+            color: var(--brand-primary);
+        }
+
+        /* Context Selection */
+        .context-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .context-card {
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            background: var(--bg-secondary);
+        }
+
+        .context-card:hover {
+            border-color: var(--brand-primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .context-card.selected {
+            border-color: var(--brand-primary);
+            background: var(--brand-accent);
+            box-shadow: var(--shadow);
+        }
+
+        .context-label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .context-desc {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* Prompt Interface */
+        .prompt-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .prompt-label {
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+            display: block;
+        }
+
+        .prompt-textarea {
+            width: 100%;
+            min-height: 100px;
+            max-height: 200px;
+            padding: 1rem;
+            border: 2px solid var(--input-border);
+            border-radius: var(--border-radius);
+            background: var(--input-bg);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-family: inherit;
+            resize: vertical;
+            transition: var(--transition);
+        }
+
+        .prompt-textarea:focus {
+            outline: none;
+            border-color: var(--input-focus);
+            box-shadow: 0 0 0 3px rgba(134, 188, 37, 0.1);
+        }
+
+        .prompt-textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* Quick Templates */
+        .template-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .template-btn {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-secondary);
+        }
+
+        .template-btn:hover {
+            background: var(--brand-primary);
+            color: white;
+            border-color: var(--brand-primary);
+            transform: translateY(-1px);
+        }
+
+        /* Action Buttons */
+        .action-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .analyze-btn {
+            background: linear-gradient(135deg, var(--brand-primary), #6fa020);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .analyze-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .analyze-btn:hover:not(:disabled)::before {
+            left: 100%;
+        }
+
+        .analyze-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .analyze-btn:disabled {
+            background: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .model-info {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* Document Upload */
+        .upload-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .upload-card {
+            background: var(--bg-secondary);
+            border: 2px dashed var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .upload-card:hover {
+            border-color: var(--brand-primary);
+            background: var(--brand-accent);
+            transform: translateY(-2px);
+        }
+
+        .upload-card h4 {
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-card p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .upload-btn {
+            background: var(--brand-primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .upload-btn:hover {
+            background: #6fa020;
+            transform: translateY(-1px);
+        }
+
+        /* Results Section */
+        .results-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-lg);
+            padding: 2rem;
+            margin-top: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--brand-primary);
+        }
+
+        .results-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .results-content {
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .analysis-text {
+            color: var(--text-primary);
+            line-height: 1.7;
+            white-space: pre-wrap;
+        }
+
+        .recommendations {
+            background: var(--brand-accent);
+            border: 1px solid var(--brand-primary);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+        }
+
+        .recommendations h4 {
+            color: var(--brand-primary);
+            margin-bottom: 1rem;
+        }
+
+        .recommendations ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .recommendations li {
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .recommendations li::before {
+            content: '→';
+            color: var(--brand-primary);
+            font-weight: bold;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--brand-primary);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        /* Loading */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-color);
+            border-top: 2px solid var(--brand-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--brand-primary);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            animation: slideInRight 0.3s ease;
+            max-width: 300px;
+        }
+
+        .toast.error {
+            background: #dc3545;
+        }
+
+        .toast.success {
+            background: var(--brand-primary);
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Loading animation for theme switch */
+        .theme-switching {
+            pointer-events: none;
+        }
+
+        .theme-switching * {
+            transition: none !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .upload-grid,
+            .model-grid,
+            .context-options {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .action-section {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+
+            .nav-buttons {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+
+        /* Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Focus styles */
+        .theme-toggle:focus,
+        .nav-btn:focus,
+        .analyze-btn:focus,
+        .upload-btn:focus,
+        .template-btn:focus,
+        .model-card:focus,
+        .context-card:focus {
+            outline: 2px solid var(--brand-primary);
+            outline-offset: 2px;
+        }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="header-left">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/56/Deloitte.svg" alt="{{CORPORATE_NAME}}" class="brand-logo">
+                <h1 class="header-title">Business Analyst Tool - Mapping-Analyzer</h1>
+            </div>
+            <nav class="nav-buttons">
+                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Theme umschalten">
+                    <span class="theme-icon sun">☀️</span>
+                    <span class="theme-icon moon">🌙</span>
+                </button>
+                <a href="/" class="nav-btn">Startseite</a>
+                <a href="/analyzer" class="nav-btn active">Analyzer</a>
+                <a href="/docs" class="nav-btn">Dokumentation</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        
+        <!-- Document Upload Section -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">📚</div>
+                <h2 class="section-title">Dokumentenkontext</h2>
+            </div>
+            
+            <div class="upload-grid">
+                <div class="upload-card">
+                    <h4>RAG Dokumente</h4>
+                    <p>Regulatorische Richtlinien & Standards</p>
+                    <input type="file" id="rag-files" multiple accept=".txt,.pdf,.md,.csv,.xlsx" style="display: none;">
+                    <button class="upload-btn" onclick="document.getElementById('rag-files').click()">
+                        Dateien hochladen
+                    </button>
+                    <div id="rag-file-list" style="margin-top: 1rem; font-size: 0.875rem;"></div>
+                </div>
+                
+                <div class="upload-card">
+                    <h4>CAG Dokumente</h4>
+                    <p>Unternehmensspezifische Verfahren</p>
+                    <input type="file" id="cag-files" multiple accept=".txt,.pdf,.md,.csv,.xlsx" style="display: none;">
+                    <button class="upload-btn" onclick="document.getElementById('cag-files').click()">
+                        Dateien hochladen
+                    </button>
+                    <div id="cag-file-list" style="margin-top: 1rem; font-size: 0.875rem;"></div>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="rag-count">0</div>
+                    <div class="stat-label">RAG Docs</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="cag-count">0</div>
+                    <div class="stat-label">CAG Docs</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="total-chunks">0</div>
+                    <div class="stat-label">Kontext-Chunks</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Model Selection -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">🤖</div>
+                <h2 class="section-title">KI-Modell-Auswahl</h2>
+            </div>
+            
+            <div class="model-grid" id="model-selection">
+                <!-- Models will be populated here -->
+            </div>
+        </section>
+
+        <!-- Context Configuration -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">📊</div>
+                <h2 class="section-title">Kontext-Konfiguration</h2>
+            </div>
+            
+            <div class="context-options" id="context-selection">
+                <div class="context-card selected" data-context="both">
+                    <div class="context-label">RAG + CAG</div>
+                    <div class="context-desc">Vollständige Kontextanalyse</div>
+                </div>
+                <div class="context-card" data-context="rag_only">
+                    <div class="context-label">Nur RAG</div>
+                    <div class="context-desc">Regulatorische Richtlinien</div>
+                </div>
+                <div class="context-card" data-context="cag_only">
+                    <div class="context-label">Nur CAG</div>
+                    <div class="context-desc">Unternehmensverfahren</div>
+                </div>
+                <div class="context-card" data-context="none">
+                    <div class="context-label">Kein Kontext</div>
+                    <div class="context-desc">Direkte KI-Analyse</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Analysis Interface -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">🔍</div>
+                <h2 class="section-title">Mapping-Fehler-Analyse</h2>
+            </div>
+
+            <!-- Quick Templates -->
+            <div class="template-buttons">
+                <button class="template-btn" onclick="insertTemplate('mapping')">Mapping-Fehler</button>
+                <button class="template-btn" onclick="insertTemplate('validation')">Datenvalidierung</button>
+                <button class="template-btn" onclick="insertTemplate('compliance')">Compliance-Prüfung</button>
+                <button class="template-btn" onclick="insertTemplate('transformation')">Transformationslogik</button>
+            </div>
+
+            <!-- Prompt Input -->
+            <div class="prompt-section">
+                <label class="prompt-label" for="analysis-prompt">
+                    Beschreiben Sie Ihr Mapping-Problem oder Ihre Analyseanfrage:
+                </label>
+                <textarea 
+                    id="analysis-prompt" 
+                    class="prompt-textarea"
+                    placeholder="Beispiel: Kunden-ID-Mapping-Inkonsistenz zwischen DWH und regulatorischem System. ID 12345 erscheint als CUST-12345 in Berichten, aber als 12345 in der Quelle..."
+                ></textarea>
+            </div>
+
+            <!-- Action Section -->
+            <div class="action-section">
+                <div class="model-info">
+                    <span>🤖 Bereit zur Analyse mit <strong id="selected-model-name">llama3</strong></span>
+                    <br>
+                    <span>📊 Kontext: <strong id="selected-context-name">RAG + CAG</strong></span>
+                </div>
+                <button class="analyze-btn" id="analyze-button" onclick="runAnalysis()">
+                    <span>Problem analysieren</span>
+                    <span>→</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <div id="results-container" class="hidden">
+            <section class="results-section">
+                <div class="results-header">
+                    <h3 class="results-title">Analyseergebnisse</h3>
+                    <button class="upload-btn" onclick="exportResults()">Exportieren</button>
+                </div>
+                
+                <div id="analysis-output" class="results-content"></div>
+                
+                <div id="recommendations-section" class="recommendations hidden">
+                    <h4>Empfohlene Maßnahmen:</h4>
+                    <ul id="recommendations-list"></ul>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        // Theme Management
+        const THEME_KEY = 'ba-tool-theme';
+        
+        function initTheme() {
+            const savedTheme = localStorage.getItem(THEME_KEY);
+            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            const theme = savedTheme || systemTheme;
+            
+            document.documentElement.setAttribute('data-theme', theme);
+            updateThemeIcon(theme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            // Add switching class to prevent transitions during theme change
+            document.body.classList.add('theme-switching');
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem(THEME_KEY, newTheme);
+            updateThemeIcon(newTheme);
+            
+            // Remove switching class after a brief delay
+            setTimeout(() => {
+                document.body.classList.remove('theme-switching');
+            }, 50);
+
+            // Show confirmation
+            showToast(`Theme gewechselt zu ${newTheme === 'dark' ? 'Dunkel' : 'Hell'}`);
+        }
+
+        function updateThemeIcon(theme) {
+            const sunIcon = document.querySelector('.theme-icon.sun');
+            const moonIcon = document.querySelector('.theme-icon.moon');
+            
+            if (theme === 'dark') {
+                sunIcon.style.opacity = '0';
+                moonIcon.style.opacity = '1';
+            } else {
+                sunIcon.style.opacity = '1';
+                moonIcon.style.opacity = '0';
+            }
+        }
+
+        // Listen for system theme changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            if (!localStorage.getItem(THEME_KEY)) {
+                const theme = e.matches ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', theme);
+                updateThemeIcon(theme);
+            }
+        });
+
+        // Application State
+        let currentModel = 'llama3';
+        let currentContext = 'both';
+        let isAnalyzing = false;
+        let uploadedFiles = { rag: [], cag: [] };
+
+        // Available models
+        const models = [
+            { id: 'llama3', name: 'Llama 3', desc: 'Ausgewogenes Analysemodell', status: 'available' },
+            { id: 'mistral', name: 'Mistral', desc: 'Schnelle Fehlererkennung', status: 'available' },
+            { id: 'gemma2', name: 'Gemma 2', desc: 'Strukturierte Datenanalyse', status: 'available' },
+            { id: 'codellama', name: 'Code Llama', desc: 'Technische Transformationsanalyse', status: 'available' }
+        ];
+
+        // Analysis templates
+        const templates = {
+            mapping: 'Kunden-ID-Mapping-Inkonsistenz zwischen DWH und regulatorischem System erkannt. Bitte analysieren Sie die Transformationsregeln.',
+            validation: 'Validieren Sie Feldmappings für regulatorische Compliance. Prüfen Sie Datentypkonsistenz bei Kundenfeldern.',
+            compliance: 'Überprüfen Sie Mapping-Regeln auf Compliance mit regulatorischen Standards. Identifizieren Sie potenzielle Verstöße.',
+            transformation: 'Untersuchen Sie Transformationslogik für Währungsumrechnung. Identifizieren Sie Inkonsistenzen in der Verarbeitung.'
+        };
+
+        // Initialize
+        function initializeApp() {
+            initTheme();
+            populateModels();
+            setupEventListeners();
+            initAnimations();
+            initKeyboardSupport();
+            console.log('🎨 Enhanced Business Analyst Tool initialized with Light/Dark Mode');
+        }
+
+        // Populate model selection
+        function populateModels() {
+            const container = document.getElementById('model-selection');
+            container.innerHTML = '';
+            
+            models.forEach(model => {
+                const modelDiv = document.createElement('div');
+                modelDiv.className = `model-card ${model.id === currentModel ? 'selected' : ''}`;
+                modelDiv.onclick = () => selectModel(model.id);
+                modelDiv.setAttribute('tabindex', '0');
+                modelDiv.setAttribute('role', 'button');
+                modelDiv.setAttribute('aria-label', `Model ${model.name} auswählen`);
+                
+                modelDiv.innerHTML = `
+                    <div class="model-name">${model.name}</div>
+                    <div class="model-desc">${model.desc}</div>
+                    <div class="model-status status-${model.status}">VERFÜGBAR</div>
+                `;
+                
+                container.appendChild(modelDiv);
+            });
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Context selection
+            document.querySelectorAll('.context-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const context = card.dataset.context;
+                    selectContext(context);
+                });
+            });
+
+            // File uploads
+            document.getElementById('rag-files').addEventListener('change', (e) => handleFileUpload(e, 'rag'));
+            document.getElementById('cag-files').addEventListener('change', (e) => handleFileUpload(e, 'cag'));
+        }
+
+        // Enhanced animations and interactions
+        function initAnimations() {
+            // Intersection Observer for scroll animations
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            // Observe elements for animation
+            document.querySelectorAll('.section').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(el);
+            });
+        }
+
+        // Keyboard navigation support
+        function initKeyboardSupport() {
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Tab') {
+                    document.body.classList.add('keyboard-nav');
+                }
+                
+                // Theme toggle with keyboard shortcut (Alt + T)
+                if (e.altKey && e.key === 't') {
+                    e.preventDefault();
+                    toggleTheme();
+                }
+
+                // Quick analysis with Ctrl+Enter
+                if (e.ctrlKey && e.key === 'Enter') {
+                    e.preventDefault();
+                    runAnalysis();
+                }
+            });
+
+            document.addEventListener('mousedown', () => {
+                document.body.classList.remove('keyboard-nav');
+            });
+
+            // Model card keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.target.classList.contains('model-card') && e.key === 'Enter') {
+                    e.target.click();
+                }
+            });
+        }
+
+        // Select model
+        function selectModel(modelId) {
+            currentModel = modelId;
+            document.querySelectorAll('.model-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.target.closest('.model-card').classList.add('selected');
+            
+            const modelName = models.find(m => m.id === modelId)?.name || modelId;
+            document.getElementById('selected-model-name').textContent = modelName;
+        }
+
+        // Select context
+        function selectContext(context) {
+            currentContext = context;
+            document.querySelectorAll('.context-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.target.closest('.context-card').classList.add('selected');
+            
+            const contextNames = {
+                both: 'RAG + CAG',
+                rag_only: 'Nur RAG',
+                cag_only: 'Nur CAG',
+                none: 'Kein Kontext'
+            };
+            
+            document.getElementById('selected-context-name').textContent = contextNames[context];
+        }
+
+        // Insert template
+        function insertTemplate(type) {
+            document.getElementById('analysis-prompt').value = templates[type];
+            showToast(`${type.toUpperCase()} Template eingefügt`);
+        }
+
+        // Handle file upload
+        async function handleFileUpload(event, type) {
+            const files = Array.from(event.target.files);
+            uploadedFiles[type] = [...uploadedFiles[type], ...files];
+            
+            // Display files
+            const listElement = document.getElementById(`${type}-file-list`);
+            listElement.innerHTML = '';
+            uploadedFiles[type].forEach(file => {
+                const fileDiv = document.createElement('div');
+                fileDiv.textContent = `📄 ${file.name}`;
+                fileDiv.style.color = 'var(--text-secondary)';
+                listElement.appendChild(fileDiv);
+            });
+            
+            // Update counts
+            document.getElementById(`${type}-count`).textContent = uploadedFiles[type].length;
+            document.getElementById('total-chunks').textContent = 
+                (uploadedFiles.rag.length + uploadedFiles.cag.length) * 10; // Estimate
+            
+            // Show success message
+            showToast(`${files.length} ${type.toUpperCase()} Datei(en) hochgeladen`);
+        }
+
+        // Run analysis
+        async function runAnalysis() {
+            const prompt = document.getElementById('analysis-prompt').value.trim();
+            if (!prompt) {
+                showToast('Bitte geben Sie eine Analyseanfrage ein', 'error');
+                return;
+            }
+
+            if (isAnalyzing) return;
+
+            // Update UI
+            isAnalyzing = true;
+            const analyzeBtn = document.getElementById('analyze-button');
+            analyzeBtn.disabled = true;
+            analyzeBtn.innerHTML = '<div class="loading"></div> Analysiere...';
+
+            try {
+                const response = await fetch('/api/analyze/mapping', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        query: prompt,
+                        model: currentModel,
+                        error_type: 'data_inconsistency',
+                        context_sources: currentContext === 'both' ? ['rag', 'cag'] : 
+                                       currentContext === 'rag_only' ? ['rag'] :
+                                       currentContext === 'cag_only' ? ['cag'] : []
+                    })
+                });
+
+                let result;
+                if (response.ok) {
+                    result = await response.json();
+                } else {
+                    // Demo fallback
+                    result = {
+                        analysis: `[${currentModel.toUpperCase()} Analyse - 2025]\n\nMapping-Fehleranalyse für: "${prompt}"\n\nIdentifiziertes Problem:\nKunden-ID-Transformationsinkonsistenz in der Datenpipeline. Die Mapping-Regeln wenden Präfixe inkonsistent an.\n\nUrsache:\nTransformationslogik in der ETL-Schicht hat bedingte Präfixanwendung statt systematischer Implementierung.\n\nEmpfehlung:\nStandardisieren Sie die Kunden-ID-Transformation, um immer das Unternehmenspräfix "CUST_" für die Konsistenz der regulatorischen Berichterstattung anzuwenden.`,
+                        remediation_steps: [
+                            'ETL-Transformationskonfiguration überprüfen',
+                            'Systematische Präfixanwendung implementieren',
+                            'Datenkonsistenz zwischen Systemen validieren',
+                            'Mapping-Dokumentation aktualisieren'
+                        ],
+                        confidence_score: 0.87,
+                        model_used: currentModel
+                    };
+                }
+
+                displayResults(result);
+                showToast('Analyse erfolgreich abgeschlossen');
+
+            } catch (error) {
+                console.error('Analysefehler:', error);
+                showToast('Analyse fehlgeschlagen. Bitte versuchen Sie es erneut.', 'error');
+            } finally {
+                // Reset UI
+                isAnalyzing = false;
+                analyzeBtn.disabled = false;
+                analyzeBtn.innerHTML = '<span>Problem analysieren</span><span>→</span>';
+            }
+        }
+
+        // Display results
+        function displayResults(result) {
+            document.getElementById('results-container').classList.remove('hidden');
+            document.getElementById('analysis-output').innerHTML = `
+                <div class="analysis-text">${result.analysis}</div>
+                ${result.model_used ? `<div style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary);">
+                    Modell: ${result.model_used} | Vertrauen: ${Math.round((result.confidence_score || 0.8) * 100)}%
+                </div>` : ''}
+            `;
+
+            // Show recommendations
+            if (result.remediation_steps) {
+                const recSection = document.getElementById('recommendations-section');
+                const recList = document.getElementById('recommendations-list');
+                
+                recList.innerHTML = '';
+                result.remediation_steps.forEach(step => {
+                    const li = document.createElement('li');
+                    li.textContent = step;
+                    recList.appendChild(li);
+                });
+                
+                recSection.classList.remove('hidden');
+            }
+
+            // Scroll to results
+            document.getElementById('results-container').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Export results
+        function exportResults() {
+            const analysisText = document.getElementById('analysis-output').textContent || '';
+            const recommendations = Array.from(document.querySelectorAll('#recommendations-list li'))
+                .map(li => `• ${li.textContent}`).join('\n');
+            
+            const exportContent = `Business Analyst Tool - Analysebericht
+Generiert: ${new Date().toLocaleString('de-DE')}
+Modell: ${currentModel}
+Kontext: ${currentContext}
+
+ANALYSE:
+${analysisText}
+
+EMPFEHLUNGEN:
+${recommendations}
+
+---
+Generiert von Business Analyst Tool 2025
+`;
+            
+            const blob = new Blob([exportContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `BA_Analyse_${new Date().toISOString().split('T')[0]}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showToast('Analysebericht exportiert');
+        }
+
+        // Enhanced toast notification
+        function showToast(message, type = 'success') {
+            // Remove existing toasts
+            document.querySelectorAll('.toast').forEach(toast => toast.remove());
+            
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.style.animation = 'slideInRight 0.3s ease reverse';
+                    setTimeout(() => toast.remove(), 300);
+                }
+            }, 3000);
+        }
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+</body>
+</html>

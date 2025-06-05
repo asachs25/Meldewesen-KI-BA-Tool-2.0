@@ -1,0 +1,35 @@
+# Enterprise Core Framework
+fastapi>=0.104.0
+uvicorn>=0.24.0
+python-multipart>=0.0.6
+python-dotenv>=1.0.0
+
+# Enterprise AI/ML Framework
+langchain>=0.1.0
+langchain-community>=0.0.12
+ollama>=0.1.8
+
+# Enterprise Vector Database
+faiss-cpu>=1.7.4
+sentence-transformers>=2.2.2
+
+# Enterprise Document Processing
+pypdf>=3.17.0
+unstructured>=0.10.0
+openpyxl>=3.1.0
+python-docx>=0.8.11
+
+# Enterprise Data Processing
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Enterprise HTTP & Utilities
+aiofiles>=23.2.0
+httpx>=0.25.0
+requests>=2.31.0
+pydantic>=2.0.0
+
+# Enterprise Security & Monitoring
+# psycopg2>=2.9.0  # Uncomment for PostgreSQL
+# redis>=4.5.0     # Uncomment for Redis
+# prometheus-client>=0.17.0  # Uncomment for monitoring
